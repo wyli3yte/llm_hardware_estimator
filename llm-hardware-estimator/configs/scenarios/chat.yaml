@@ -1,0 +1,18 @@
+{
+  "scenario": {
+    "name": "chat",
+    "input_tokens": 1024,
+    "output_tokens": 512,
+    "concurrency": 2,
+    "weight_precision": "bf16",
+    "activation_precision": "bf16",
+    "kv_cache_precision": "bf16",
+    "quantization": "none",
+    "kv_cache_mode": "peak",
+    "gpu_utilization_target": 0.85,
+    "runtime_overhead": {"absolute_gb": 2.0, "weight_ratio": 0.10, "kv_cache_ratio": 0.15},
+    "production_margin_ratio": 0.30,
+    "parallel": {"strategy": "none", "tensor_parallel_size": 1, "pipeline_parallel_size": 1, "parallel_overhead_factor": 1.00},
+    "decision_goal": "balanced"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "platform_profiles": {
+    "ascend-mindie": {
+      "vendor": "华为昇腾",
+      "engines": ["MindIE LLM"],
+      "api_protocols": ["OpenAI-compatible", "TGI-compatible", "vLLM-compatible"],
+      "optimization_features": ["continuous_batching", "page_attention", "flash_decoding", "kv_cache_pooling", "kv_cache_int8"],
+      "default_efficiency": {"prefill": 0.35, "decode": 0.30},
+      "source_url": "https://www.hiascend.com/document/detail/zh/mindie/22RC1/mindiellm/llmdev/mindie_llm0001.html",
+      "confidence": "high"
+    },
+    "mthreads-musa": {
+      "vendor": "摩尔线程",
+      "engines": ["vLLM-MUSA"],
+      "api_protocols": ["OpenAI-compatible"],
+      "optimization_features": ["continuous_batching"],
+      "default_efficiency": {"prefill": 0.25, "decode": 0.22},
+      "source_url": "https://github.com/MooreThreads/vllm-musa",
+      "confidence": "medium"
+    },
+    "lmdeploy-maca": {
+      "vendor": "沐曦",
+      "engines": ["LMDeploy"],
+      "api_protocols": ["OpenAI-compatible"],
+      "optimization_features": ["paged_kv_cache"],
+      "default_efficiency": {"prefill": 0.25, "decode": 0.22},
+      "source_url": "https://lmdeploy.readthedocs.io/zh-cn/latest/get_started/maca/get_started.html",
+      "confidence": "medium"
+    }
+  }
+}

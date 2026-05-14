@@ -1,0 +1,67 @@
+{
+  "models": {
+    "qwen-1.7b": {
+      "model_type": "dense",
+      "task_type": "generation",
+      "params_billion": 1.7,
+      "active_params_billion": 1.7,
+      "num_layers": 24,
+      "hidden_size": 2048,
+      "num_attention_heads": 16,
+      "num_kv_heads": 16,
+      "attention_type": "full",
+      "sliding_window_size": null,
+      "max_context_length": 32768,
+      "source_url": "",
+      "confidence": "medium"
+    },
+    "qwen3-32b": {
+      "model_type": "dense",
+      "task_type": "generation",
+      "params_billion": 32,
+      "active_params_billion": 32,
+      "num_layers": 64,
+      "hidden_size": 5120,
+      "num_attention_heads": 40,
+      "num_kv_heads": 8,
+      "attention_type": "full",
+      "sliding_window_size": null,
+      "max_context_length": 131072,
+      "source_url": "",
+      "confidence": "medium"
+    },
+    "qwen3.5-35b-a3b": {
+      "model_type": "moe",
+      "task_type": "generation",
+      "params_billion": 35,
+      "active_params_billion": 3,
+      "num_layers": null,
+      "hidden_size": null,
+      "num_attention_heads": null,
+      "num_kv_heads": null,
+      "attention_type": "full",
+      "sliding_window_size": null,
+      "max_context_length": 262144,
+      "source_url": "",
+      "confidence": "low"
+    },
+    "qwen3-embedding-8b": {
+      "model_type": "encoder_or_embedding",
+      "task_type": "embedding",
+      "params_billion": 8,
+      "active_params_billion": 8,
+      "max_context_length": 40960,
+      "source_url": "",
+      "confidence": "low"
+    },
+    "qwen3-reranker-8b": {
+      "model_type": "encoder_or_decoder_classifier",
+      "task_type": "reranker",
+      "params_billion": 8,
+      "active_params_billion": 8,
+      "max_context_length": 40960,
+      "source_url": "",
+      "confidence": "low"
+    }
+  }
+}
