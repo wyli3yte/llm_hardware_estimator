@@ -20,6 +20,7 @@ class ConfigAndExportTests(unittest.TestCase):
         self.assertEqual(report["status"], "ok")
         self.assertGreaterEqual(report["models"], 3)
         self.assertGreaterEqual(report["hardware"], 3)
+        self.assertGreaterEqual(report["scenarios"], 6)
 
     def test_json_compatible_yaml_loader_reads_nested_config(self):
         models = load_mapping_file(ROOT / "llm-hardware-estimator" / "configs" / "models.yaml")
@@ -76,6 +77,39 @@ class CliSmokeTests(unittest.TestCase):
             payload = json.loads(json_path.read_text(encoding="utf-8"))
             self.assertEqual(payload["model_id"], "qwen3-32b")
             self.assertIn("gpu_candidates", payload)
+            self.assertIn("scenario_comparison", payload)
+            self.assertIn("sources", payload)
+            self.assertTrue(payload["scenario_comparison"])
+            self.assertTrue(payload["sources"])
+
+    def test_recommend_command_exports_scenario_and_source_csvs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_dir = Path(tmp) / "csv"
+            proc = subprocess.run(
+                [
+                    "python3",
+                    str(ROOT / "llm-hardware-estimator" / "estimator.py"),
+                    "recommend",
+                    "--model",
+                    "qwen3-32b",
+                    "--scenario",
+                    "rag",
+                    "--export-csv",
+                    str(csv_dir),
+                ],
+                cwd=str(ROOT),
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            scenario_csv = csv_dir / "scenario_comparison.csv"
+            sources_csv = csv_dir / "sources.csv"
+            self.assertTrue(scenario_csv.exists())
+            self.assertTrue(sources_csv.exists())
+            self.assertIn("long_doc", scenario_csv.read_text(encoding="utf-8"))
+            self.assertIn("source_url", sources_csv.read_text(encoding="utf-8"))
 
     def test_invalid_model_returns_similar_choices(self):
         proc = subprocess.run(

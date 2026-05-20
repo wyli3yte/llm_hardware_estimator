@@ -1,0 +1,6 @@
+hardware_id,vendor,gpu_model,source_type,confidence,source_url,last_checked
+muxi-c500-64g,沐曦,曦云C500 64GB,software_official_hardware_third_party,medium,https://lmdeploy.readthedocs.io/zh-cn/latest/get_started/maca/get_started.html,2026-05-14
+ascend-910b-64g,华为昇腾,910B 64GB平台,official_plus_supplier,medium,https://e.huawei.com/cn/products/computing/ascend/atlas-800i-a2,2026-05-14
+mthreads-s4000,摩尔线程,MTT S4000,official,high,https://docs.mthreads.com/s4000/s4000-doc-online/product_specifications/,2026-05-14
+cambricon-mlu370-x8,寒武纪,MLU370-X8,official,high,https://cambricon.com/index.php?a=lists&c=index&catid=406&m=content,2026-05-14
+kunlunxin-r200-32g,昆仑芯,R200-8F 32GB,official,high,https://www.kunlunxin.com/product/274.html,2026-05-14

@@ -207,5 +207,126 @@
     }
   ],
   "precision_comparison": [],
+  "scenario_comparison": [
+    {
+      "scenario": "chat",
+      "input_tokens": 1024,
+      "output_tokens": 512,
+      "concurrency": 2,
+      "required_memory_gb": 66.42760925292968,
+      "production_memory_gb": 86.3558920288086,
+      "suggested_gpu_count": 2,
+      "suggested_gpu_memory_gb": 64.0,
+      "suggested_gpu_model": "曦云C500 64GB",
+      "note": "可作为生产试点"
+    },
+    {
+      "scenario": "demo",
+      "input_tokens": 2048,
+      "output_tokens": 256,
+      "concurrency": 1,
+      "required_memory_gb": 66.21198425292968,
+      "production_memory_gb": 86.07557952880859,
+      "suggested_gpu_count": 2,
+      "suggested_gpu_memory_gb": 64.0,
+      "suggested_gpu_model": "曦云C500 64GB",
+      "note": "可作为生产试点"
+    },
+    {
+      "scenario": "embedding",
+      "input_tokens": 1024,
+      "output_tokens": 0,
+      "concurrency": 16,
+      "required_memory_gb": 70.16510925292968,
+      "production_memory_gb": 91.21464202880858,
+      "suggested_gpu_count": 2,
+      "suggested_gpu_memory_gb": 64.0,
+      "suggested_gpu_model": "曦云C500 64GB",
+      "note": "可作为生产试点"
+    },
+    {
+      "scenario": "long_doc",
+      "input_tokens": 32768,
+      "output_tokens": 1024,
+      "concurrency": 2,
+      "required_memory_gb": 84.54010925292968,
+      "production_memory_gb": 109.90214202880858,
+      "suggested_gpu_count": 3,
+      "suggested_gpu_memory_gb": 64.0,
+      "suggested_gpu_model": "曦云C500 64GB",
+      "note": "可作为生产试点"
+    },
+    {
+      "scenario": "rag",
+      "input_tokens": 4096,
+      "output_tokens": 512,
+      "concurrency": 4,
+      "required_memory_gb": 70.74010925292968,
+      "production_memory_gb": 91.9621420288086,
+      "suggested_gpu_count": 2,
+      "suggested_gpu_memory_gb": 64.0,
+      "suggested_gpu_model": "曦云C500 64GB",
+      "note": "可作为生产试点"
+    },
+    {
+      "scenario": "reranker",
+      "input_tokens": 1024,
+      "output_tokens": 0,
+      "concurrency": 8,
+      "required_memory_gb": 67.86510925292968,
+      "production_memory_gb": 88.22464202880859,
+      "suggested_gpu_count": 2,
+      "suggested_gpu_memory_gb": 64.0,
+      "suggested_gpu_model": "曦云C500 64GB",
+      "note": "可作为生产试点"
+    }
+  ],
+  "sources": [
+    {
+      "hardware_id": "muxi-c500-64g",
+      "vendor": "沐曦",
+      "gpu_model": "曦云C500 64GB",
+      "source_type": "software_official_hardware_third_party",
+      "confidence": "medium",
+      "source_url": "https://lmdeploy.readthedocs.io/zh-cn/latest/get_started/maca/get_started.html",
+      "last_checked": "2026-05-14"
+    },
+    {
+      "hardware_id": "ascend-910b-64g",
+      "vendor": "华为昇腾",
+      "gpu_model": "910B 64GB平台",
+      "source_type": "official_plus_supplier",
+      "confidence": "medium",
+      "source_url": "https://e.huawei.com/cn/products/computing/ascend/atlas-800i-a2",
+      "last_checked": "2026-05-14"
+    },
+    {
+      "hardware_id": "mthreads-s4000",
+      "vendor": "摩尔线程",
+      "gpu_model": "MTT S4000",
+      "source_type": "official",
+      "confidence": "high",
+      "source_url": "https://docs.mthreads.com/s4000/s4000-doc-online/product_specifications/",
+      "last_checked": "2026-05-14"
+    },
+    {
+      "hardware_id": "cambricon-mlu370-x8",
+      "vendor": "寒武纪",
+      "gpu_model": "MLU370-X8",
+      "source_type": "official",
+      "confidence": "high",
+      "source_url": "https://cambricon.com/index.php?a=lists&c=index&catid=406&m=content",
+      "last_checked": "2026-05-14"
+    },
+    {
+      "hardware_id": "kunlunxin-r200-32g",
+      "vendor": "昆仑芯",
+      "gpu_model": "R200-8F 32GB",
+      "source_type": "official",
+      "confidence": "high",
+      "source_url": "https://www.kunlunxin.com/product/274.html",
+      "last_checked": "2026-05-14"
+    }
+  ],
   "validation": []
 }

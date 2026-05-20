@@ -19,7 +19,16 @@ def _clean(value):
     return value
 
 
-def result_payload(model_id, scenario, memory, candidates=None, precision_comparison=None, validation=None):
+def result_payload(
+    model_id,
+    scenario,
+    memory,
+    candidates=None,
+    precision_comparison=None,
+    scenario_comparison=None,
+    sources=None,
+    validation=None,
+):
     return _clean(
         {
             "model_id": model_id,
@@ -27,6 +36,8 @@ def result_payload(model_id, scenario, memory, candidates=None, precision_compar
             "memory": memory,
             "gpu_candidates": [item.to_dict() for item in candidates or []],
             "precision_comparison": precision_comparison or [],
+            "scenario_comparison": scenario_comparison or [],
+            "sources": sources or [],
             "validation": validation or [],
         }
     )
@@ -106,6 +117,21 @@ def render_markdown(payload, title="LLM推理硬件需求估算报告", buyer_op
                     **row
                 )
             )
+    if payload.get("scenario_comparison"):
+        lines.extend(
+            [
+                "",
+                "## 场景对比",
+                "| scenario | input | output | concurrency | production_gb | suggested_cards | suggested_gpu | note |",
+                "|---|---:|---:|---:|---:|---:|---|---|",
+            ]
+        )
+        for row in payload["scenario_comparison"]:
+            lines.append(
+                "| {scenario} | {input_tokens} | {output_tokens} | {concurrency} | {production_memory_gb:.2f} | {suggested_gpu_count} | {suggested_gpu_model} | {note} |".format(
+                    **row
+                )
+            )
     lines.extend(
         [
             "",
@@ -136,6 +162,8 @@ def export_csv_dir(path, payload):
     tables = {
         "gpu_comparison.csv": payload.get("gpu_candidates", []),
         "precision_comparison.csv": payload.get("precision_comparison", []),
+        "scenario_comparison.csv": payload.get("scenario_comparison", []),
+        "sources.csv": payload.get("sources", []),
         "validation.csv": payload.get("validation", []),
         "assumptions.csv": [{"key": key, "value": value} for key, value in payload.get("scenario", {}).items()],
     }
@@ -164,7 +192,9 @@ def export_xlsx(path, payload):
             ],
             "GPU_Comparison": payload.get("gpu_candidates", []),
             "Precision_Comparison": payload.get("precision_comparison", []),
+            "Scenario_Comparison": payload.get("scenario_comparison", []),
             "Assumptions": [{"key": key, "value": value} for key, value in payload.get("scenario", {}).items()],
+            "Sources": payload.get("sources", []),
             "Validation": payload.get("validation", []),
         },
     )

@@ -24,6 +24,54 @@ from .report_renderer import (
 )
 
 
+def _source_rows(hardware_db, candidates=None):
+    candidate_ids = [item.hardware_id for item in candidates] if candidates else sorted(hardware_db)
+    rows = []
+    for hardware_id in candidate_ids:
+        gpu = hardware_db.get(hardware_id)
+        if not gpu:
+            continue
+        rows.append(
+            {
+                "hardware_id": hardware_id,
+                "vendor": gpu.get("vendor", ""),
+                "gpu_model": gpu.get("model", hardware_id),
+                "source_type": gpu.get("source_type", ""),
+                "confidence": gpu.get("confidence", ""),
+                "source_url": gpu.get("source_url", ""),
+                "last_checked": gpu.get("last_checked", ""),
+            }
+        )
+    return rows
+
+
+def _scenario_comparison_rows(configs, model, target, goal, base_scenario):
+    rows = []
+    for scenario_name, scenario in sorted(configs["scenarios"].items()):
+        variant = dict(scenario)
+        variant["weight_precision"] = base_scenario.get("weight_precision", variant.get("weight_precision", "bf16"))
+        variant["kv_cache_precision"] = base_scenario.get("kv_cache_precision", variant.get("kv_cache_precision", "bf16"))
+        variant["quantization"] = base_scenario.get("quantization", variant.get("quantization", "none"))
+        memory = estimate_memory(model, variant)
+        candidates = recommend_hardware(model, variant, configs["hardware"], goal=goal, target=target)
+        best = candidates[0] if candidates else None
+        rows.append(
+            {
+                "scenario": scenario_name,
+                "input_tokens": variant.get("input_tokens", 0),
+                "output_tokens": variant.get("output_tokens", 0),
+                "concurrency": variant.get("concurrency", 1),
+                "required_memory_gb": memory.total_memory_gb,
+                "production_memory_gb": memory.production_memory_gb,
+                "suggested_gpu_count": best.suggested_gpu_count if best else 0,
+                "suggested_gpu_memory_gb": best.memory_per_gpu_gb if best else 0,
+                "suggested_gpu_model": best.gpu_model if best else "",
+                "note": "可作为生产试点" if best and best.fit_status == "Fit" else "需补充硬件或降低场景压力",
+            }
+        )
+    return rows
+
+
 def _add_common(parser):
     parser.add_argument("--config-dir", default=None)
     parser.add_argument("--model", required=True)
@@ -84,7 +132,13 @@ def cmd_estimate(args):
     hardware_id, hardware = resolve_key(configs["hardware"], args.hardware, "硬件")
     memory = estimate_memory(model, scenario)
     candidates = recommend_hardware(model, scenario, {hardware_id: hardware}, goal="balanced", target="all")
-    payload = result_payload(model_id, scenario, memory, candidates)
+    payload = result_payload(
+        model_id,
+        scenario,
+        memory,
+        candidates,
+        sources=_source_rows({hardware_id: hardware}, candidates),
+    )
     _export(args, payload)
     print(render_markdown(payload))
     return 0
@@ -94,7 +148,14 @@ def cmd_recommend(args):
     configs, model_id, model, scenario, goal = _load_context(args)
     memory = estimate_memory(model, scenario)
     candidates = recommend_hardware(model, scenario, configs["hardware"], goal=goal, target=args.target)
-    payload = result_payload(model_id, scenario, memory, candidates)
+    payload = result_payload(
+        model_id,
+        scenario,
+        memory,
+        candidates,
+        scenario_comparison=_scenario_comparison_rows(configs, model, args.target, goal, scenario),
+        sources=_source_rows(configs["hardware"], candidates),
+    )
     _export(args, payload)
     if candidates:
         best = candidates[0]
@@ -118,7 +179,14 @@ def cmd_buy(args):
     memory = estimate_memory(model, scenario)
     candidates = recommend_hardware(model, scenario, configs["hardware"], goal=goal, target=args.target)
     buyer_options = build_buyer_options(candidates)
-    payload = result_payload(model_id, scenario, memory, candidates)
+    payload = result_payload(
+        model_id,
+        scenario,
+        memory,
+        candidates,
+        scenario_comparison=_scenario_comparison_rows(configs, model, args.target, goal, scenario),
+        sources=_source_rows(configs["hardware"], candidates),
+    )
     _export(args, payload, buyer_options=buyer_options)
     if not buyer_options:
         print("当前约束下未找到采购候选。")
@@ -151,7 +219,15 @@ def cmd_compare_precision(args):
         )
     memory = estimate_memory(model, scenario)
     candidates = recommend_hardware(model, scenario, configs["hardware"], goal=goal, target=args.target)
-    payload = result_payload(model_id, scenario, memory, candidates, precision_comparison=rows)
+    payload = result_payload(
+        model_id,
+        scenario,
+        memory,
+        candidates,
+        precision_comparison=rows,
+        scenario_comparison=_scenario_comparison_rows(configs, model, args.target, goal, scenario),
+        sources=_source_rows(configs["hardware"], candidates),
+    )
     _export(args, payload)
     print(render_markdown(payload))
     return 0
