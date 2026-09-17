@@ -11,19 +11,19 @@
 - 输出可用于方案沟通的 Excel 报告。
 - 结合压测结果校准理论估算。
 
-## 2. 交付包内容
+## 2. 仓库内容
 
-交付包主要包含：
+仓库主要包含：
 
-- `START_WEB.command`：macOS Web 门户启动脚本。
-- `web_app.py`、`web/`：Web 门户服务和页面文件。
-- `estimator.py`、`estimator/`：估算核心程序。
-- `configs/`：模型、场景、硬件和平台配置。
-- `tools/benchmark_openai.py`：OpenAI-compatible 接口压测脚本。
-- `outputs/qwen32b_compare.xlsx`：示例 Excel 报告。
+- `llm-hardware-estimator/START_WEB.command`：macOS Web 门户启动脚本。
+- `llm-hardware-estimator/web_app.py`、`llm-hardware-estimator/web/`：Web 门户服务和页面文件。
+- `llm-hardware-estimator/estimator.py`、`llm-hardware-estimator/estimator/`：估算核心程序。
+- `llm-hardware-estimator/configs/`：模型、场景、硬件和平台配置。
+- `llm-hardware-estimator/tools/benchmark_openai.py`：OpenAI-compatible 接口压测脚本。
+- `llm-hardware-estimator/outputs/qwen32b_compare.xlsx`：示例 Excel 报告。
 - `README.md`：本说明文档。
 
-交付包不包含账号、密码、VPN 信息、API Key、内网地址、个人资料、临时报表或系统隐藏文件。
+仓库不包含账号、密码、VPN 信息、API Key、内网地址、个人资料、临时报表或系统隐藏文件。
 
 ## 3. 快速使用
 
