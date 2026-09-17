@@ -4,6 +4,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,6 +46,77 @@ class ConfigAndExportTests(unittest.TestCase):
 
 
 class CliSmokeTests(unittest.TestCase):
+    def test_output_xlsx_creates_focused_single_workbook(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            xlsx_path = Path(tmp) / "decision.xlsx"
+            proc = subprocess.run(
+                [
+                    "python3",
+                    str(ROOT / "llm-hardware-estimator" / "estimator.py"),
+                    "recommend",
+                    "--model",
+                    "qwen3-32b",
+                    "--scenario",
+                    "rag",
+                    "--concurrency",
+                    "4",
+                    "--output",
+                    str(xlsx_path),
+                ],
+                cwd=str(ROOT),
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertTrue(xlsx_path.exists())
+            with zipfile.ZipFile(xlsx_path) as workbook:
+                workbook_xml = workbook.read("xl/workbook.xml").decode("utf-8")
+                sheet1_xml = workbook.read("xl/worksheets/sheet1.xml").decode("utf-8")
+
+            for sheet_name in ("Decision", "Options", "GPU_Comparison", "What_If", "Appendix"):
+                self.assertIn('name="%s"' % sheet_name, workbook_xml)
+            self.assertNotIn('name="Summary"', workbook_xml)
+            self.assertIn("LLM推理硬件需求估算与国产GPU选型报告", sheet1_xml)
+            self.assertIn("面向模型容量估算、国产GPU初筛和测试验证", sheet1_xml)
+            self.assertIn("推荐结论", sheet1_xml)
+            self.assertIn("关键风险Top3", sheet1_xml)
+            with zipfile.ZipFile(xlsx_path) as workbook:
+                appendix_xml = workbook.read("xl/worksheets/sheet5.xml").decode("utf-8")
+            self.assertIn("显存误差≤5%：通过", appendix_xml)
+            self.assertIn("5%-10%：可接受", appendix_xml)
+            self.assertIn("&gt;10%：不通过", appendix_xml)
+
+    def test_recommend_output_xlsx_includes_precision_and_scenario_what_if(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            xlsx_path = Path(tmp) / "decision.xlsx"
+            proc = subprocess.run(
+                [
+                    "python3",
+                    str(ROOT / "llm-hardware-estimator" / "estimator.py"),
+                    "recommend",
+                    "--model",
+                    "qwen3-32b",
+                    "--scenario",
+                    "rag",
+                    "--output",
+                    str(xlsx_path),
+                ],
+                cwd=str(ROOT),
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            with zipfile.ZipFile(xlsx_path) as workbook:
+                what_if_xml = workbook.read("xl/worksheets/sheet4.xml").decode("utf-8")
+
+            self.assertIn("precision", what_if_xml)
+            self.assertIn("scenario", what_if_xml)
+            self.assertIn("w4a16_kv_int8", what_if_xml)
+
     def test_recommend_command_exports_markdown_and_json(self):
         with tempfile.TemporaryDirectory() as tmp:
             md_path = Path(tmp) / "report.md"

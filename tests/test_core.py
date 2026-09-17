@@ -9,6 +9,7 @@ sys.path.insert(0, str(ROOT / "llm-hardware-estimator"))
 from estimator.memory_model import estimate_memory
 from estimator.precision import bytes_per_param, parse_precision_bundle
 from estimator.hardware_selector import recommend_hardware
+from estimator.calibration import classify_memory_error
 
 
 QWEN32B = {
@@ -151,6 +152,14 @@ class HardwareSelectorTests(unittest.TestCase):
         self.assertEqual(ranked[0].fit_status, "Fit")
         self.assertTrue(math.isfinite(ranked[0].score))
         self.assertGreaterEqual(ranked[1].suggested_gpu_count, 2)
+
+
+class CalibrationTests(unittest.TestCase):
+    def test_memory_error_thresholds_are_strict_for_customer_validation(self):
+        self.assertEqual(classify_memory_error(0.04), "通过")
+        self.assertEqual(classify_memory_error(0.08), "可接受")
+        self.assertEqual(classify_memory_error(0.12), "不通过")
+        self.assertEqual(classify_memory_error(None), "缺少实测显存")
 
 
 if __name__ == "__main__":

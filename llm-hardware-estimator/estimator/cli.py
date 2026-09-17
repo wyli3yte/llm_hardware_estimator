@@ -24,6 +24,32 @@ from .report_renderer import (
 )
 
 
+DEFAULT_PRECISION_COMPARISON = ["bf16", "w8a16", "w4a16", "w4a16_kv_int8"]
+
+
+def _precision_comparison_rows(model, scenario, precisions=None):
+    rows = []
+    for item in precisions or DEFAULT_PRECISION_COMPARISON:
+        bundle = parse_precision_bundle(item.strip())
+        variant = dict(scenario)
+        variant["weight_precision"] = bundle.weight_precision
+        variant["activation_precision"] = bundle.activation_precision
+        variant["kv_cache_precision"] = bundle.kv_cache_precision
+        variant["quantization"] = bundle.quantization
+        estimate = estimate_memory(model, variant)
+        rows.append(
+            {
+                "precision": item.strip(),
+                "weight_memory_gb": estimate.weight_memory_gb,
+                "kv_cache_peak_gb": estimate.kv_cache_peak_gb,
+                "runtime_overhead_gb": estimate.runtime_overhead_gb,
+                "production_memory_gb": estimate.production_memory_gb,
+                "quality_risk": QUALITY_RISK.get(bundle.weight_precision, "medium"),
+            }
+        )
+    return rows
+
+
 def _source_rows(hardware_db, candidates=None):
     candidate_ids = [item.hardware_id for item in candidates] if candidates else sorted(hardware_db)
     rows = []
@@ -116,15 +142,22 @@ def _load_context(args):
 
 
 def _export(args, payload, buyer_options=None):
-    md_path = args.export_md or args.output_md
-    if md_path:
-        export_markdown(md_path, payload, buyer_options=buyer_options)
+    if args.output_md:
+        suffix = str(args.output_md).lower()
+        if suffix.endswith(".xlsx"):
+            export_xlsx(args.output_md, payload, buyer_options=buyer_options)
+        elif suffix.endswith(".json"):
+            export_json(args.output_md, payload)
+        else:
+            export_markdown(args.output_md, payload, buyer_options=buyer_options)
+    if args.export_md:
+        export_markdown(args.export_md, payload, buyer_options=buyer_options)
     if args.export_json:
         export_json(args.export_json, payload)
     if args.export_csv:
         export_csv_dir(args.export_csv, payload)
     if args.export_xlsx:
-        export_xlsx(args.export_xlsx, payload)
+        export_xlsx(args.export_xlsx, payload, buyer_options=buyer_options)
 
 
 def cmd_estimate(args):
@@ -148,15 +181,17 @@ def cmd_recommend(args):
     configs, model_id, model, scenario, goal = _load_context(args)
     memory = estimate_memory(model, scenario)
     candidates = recommend_hardware(model, scenario, configs["hardware"], goal=goal, target=args.target)
+    buyer_options = build_buyer_options(candidates)
     payload = result_payload(
         model_id,
         scenario,
         memory,
         candidates,
+        precision_comparison=_precision_comparison_rows(model, scenario),
         scenario_comparison=_scenario_comparison_rows(configs, model, args.target, goal, scenario),
         sources=_source_rows(configs["hardware"], candidates),
     )
-    _export(args, payload)
+    _export(args, payload, buyer_options=buyer_options)
     if candidates:
         best = candidates[0]
         print(
@@ -184,6 +219,7 @@ def cmd_buy(args):
         scenario,
         memory,
         candidates,
+        precision_comparison=_precision_comparison_rows(model, scenario),
         scenario_comparison=_scenario_comparison_rows(configs, model, args.target, goal, scenario),
         sources=_source_rows(configs["hardware"], candidates),
     )
@@ -198,25 +234,7 @@ def cmd_buy(args):
 
 def cmd_compare_precision(args):
     configs, model_id, model, scenario, goal = _load_context(args)
-    rows = []
-    for item in args.precisions.split(","):
-        bundle = parse_precision_bundle(item.strip())
-        variant = dict(scenario)
-        variant["weight_precision"] = bundle.weight_precision
-        variant["activation_precision"] = bundle.activation_precision
-        variant["kv_cache_precision"] = bundle.kv_cache_precision
-        variant["quantization"] = bundle.quantization
-        estimate = estimate_memory(model, variant)
-        rows.append(
-            {
-                "precision": item.strip(),
-                "weight_memory_gb": estimate.weight_memory_gb,
-                "kv_cache_peak_gb": estimate.kv_cache_peak_gb,
-                "runtime_overhead_gb": estimate.runtime_overhead_gb,
-                "production_memory_gb": estimate.production_memory_gb,
-                "quality_risk": QUALITY_RISK.get(bundle.weight_precision, "medium"),
-            }
-        )
+    rows = _precision_comparison_rows(model, scenario, args.precisions.split(","))
     memory = estimate_memory(model, scenario)
     candidates = recommend_hardware(model, scenario, configs["hardware"], goal=goal, target=args.target)
     payload = result_payload(

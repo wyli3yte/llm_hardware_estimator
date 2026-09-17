@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LLM推理硬件需求估算与国产GPU选型工具</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <p class="eyebrow">容量估算 · 方案对比 · Excel交付</p>
+          <h1>LLM推理硬件需求估算与国产GPU选型工具</h1>
+          <p class="subtitle">选择模型与业务场景，生成GPU推荐方案并下载单文件Excel报告。</p>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <form id="estimate-form" class="control-panel">
+          <label>
+            模型
+            <select id="model" name="model"></select>
+          </label>
+          <label>
+            场景
+            <select id="scenario" name="scenario"></select>
+          </label>
+          <label>
+            并发
+            <input id="concurrency" name="concurrency" type="number" min="1" value="4" />
+          </label>
+          <label>
+            精度
+            <select id="weight_precision" name="weight_precision"></select>
+          </label>
+          <label>
+            决策目标
+            <select id="goal" name="goal"></select>
+          </label>
+          <label>
+            硬件范围
+            <select id="target" name="target"></select>
+          </label>
+          <button type="submit">生成方案</button>
+        </form>
+
+        <section class="result-panel">
+          <div id="status" class="status">请选择参数后生成方案。</div>
+          <div id="decision" class="decision"></div>
+          <div id="options"></div>
+          <div class="table-wrap">
+            <table id="gpu-table"></table>
+          </div>
+          <a id="download" class="download" href="#" hidden>下载Excel报告</a>
+        </section>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -13,6 +13,16 @@ def _percentile(values, ratio):
     return ordered[index]
 
 
+def classify_memory_error(error_ratio):
+    if error_ratio is None:
+        return "缺少实测显存"
+    if error_ratio <= 0.05:
+        return "通过"
+    if error_ratio <= 0.10:
+        return "可接受"
+    return "不通过"
+
+
 def validate_benchmark_csv(path, model, base_scenario):
     path = Path(path)
     rows = []
@@ -28,14 +38,7 @@ def validate_benchmark_csv(path, model, base_scenario):
             estimate = estimate_memory(model, scenario)
             observed = float(row.get("peak_memory_gb") or 0)
             error = abs(estimate.total_memory_gb - observed) / observed if observed else None
-            if error is None:
-                conclusion = "缺少实测显存"
-            elif error <= 0.15:
-                conclusion = "通过"
-            elif error <= 0.30:
-                conclusion = "需解释差异"
-            else:
-                conclusion = "不通过"
+            conclusion = classify_memory_error(error)
             rows.append(
                 {
                     "run_id": row.get("run_id", ""),

@@ -1,0 +1,13 @@
+.DS_Store
+**/.DS_Store
+*.zip
+
+# Local-only environment and credential files.
+*.private.json
+*.private.yaml
+*.private.yml
+configs/*.local.*
+llm-hardware-estimator/configs/*.local.*
+llm-hardware-estimator/configs/*.private.*
+llm-hardware-estimator/outputs/private/
+llm-hardware-estimator/outputs/web_reports/
